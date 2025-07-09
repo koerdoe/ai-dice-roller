@@ -6,6 +6,6 @@
     "js": "script.js",
     "css": "style.css",
     "author": "{{user}}",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "homePage": ""
 }

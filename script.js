@@ -48,32 +48,36 @@ function registerAiDiceRoller() {
         context.registerFunctionTool({
             name: "roll_dice_formula",
             displayName: "AI Dice Roller",
-            description: `
-Use this function to determine the outcome of a random event or a skill check.
-You must provide a valid dice formula. The function will return a JSON object containing the total sum and an array of the individual dice rolls.
-**For special rolls like Advantage/Disadvantage, you must handle the logic yourself:**
-- **Advantage Roll (e.g., on a d20):** Set the formula to '2d20'. Then, from the returned 'rolls' array, you must select the HIGHER value as the final result.
-- **Disadvantage Roll (e.g., on a d20):** Set the formula to '2d20'. Then, from the returned 'rolls' array, you must select the LOWER value as the final result.
-Example: For an Advantage roll, you call with '2d20'. The tool returns {"total":25,"rolls":[17,8]}. You then state that the result is 17.
-**Efficient Multi-Rolls & Loops:**
-- For tasks requiring multiple rolls (e.g., "roll until you succeed"), **DO NOT** call the tool repeatedly for each roll.
-- Instead, roll a batch of dice in a single, efficient call (e.g., '10d100').
-- Then, process the returned 'rolls' array internally to find the first success or complete the task.
-`.trim(),
+            description: `Use this function for dice rolls. It returns a JSON object with 'total' and an array of 'rolls'.
+
+**Advantage/Disadvantage Rolls:**
+- **Advantage:** Set formula to '2d20'. You must then use the HIGHER value from the returned 'rolls' array.
+- **Disadvantage:** Set formula to '2d20'. You must then use the LOWER value from the returned 'rolls' array.`,
 
             parameters: parametersSchema,
-
             action: async ({ formula }) => {
+                console.log(`[AI-Dice-Roller] Action started for formula: ${formula}`);
+
+                // The core logic of rolling the dice.
                 const result = rollDice(formula);
+
                 if (result) {
-                    return JSON.stringify(result);
+                    // Return the full result object as a JSON string.
+                    const jsonResult = JSON.stringify(result);
+                    console.log(`[AI-Dice-Roller] Returning successful result: ${jsonResult}`);
+                    return jsonResult;
                 } else {
-                    return `Error: Invalid dice formula "${formula}". Please provide a valid formula like '1d20' or '2d6+3'.`;
+                    // Inform the AI that the roll failed due to an invalid formula.
+                    const errorMessage = `Error: Invalid dice formula "${formula}". Please provide a valid formula like '1d20' or '2d6+3'.`;
+                    console.log(`[AI-Dice-Roller] Returning error: ${errorMessage}`);
+                    return errorMessage;
                 }
             },
 
             formatMessage: () => '',
-            stealth: true,
+
+            // We are keeping stealth: true for this test.
+            stealth: false,
         });
 
         console.log("[AI-Dice-Roller] Dice rolling function tool registered successfully with updated description for Advantage/Disadvantage.");
